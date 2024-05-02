@@ -22,6 +22,30 @@ app.post('/register', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+// Admin protal Login
+// Import necessary modules
+const bcrypt = require('bcryptjs');
+
+// Assuming you have a model for Admin, if not, you need to create one similar to the User model
+const Admin = require('./models/Admin');
+
+// Route to handle admin login
+app.post('/admin/login', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const admin = await Admin.findOne({ email: email });
+        if (admin && bcrypt.compareSync(password, admin.password)) {
+            // Passwords match
+            res.redirect('/table.html'); // Redirect to table.html if login is successful
+        } else {
+            // Authentication failed
+            res.status(401).send('Invalid admin credentials');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server error');
+    }
+});
 
 // Existing code for server and MongoDB connection...
 
@@ -36,7 +60,7 @@ const mongoose = require('mongoose');
 // Replace 'your_database_url' with your actual MongoDB connection string
 const mongoDB = 'mongodb://localhost:27017';
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
-
+    
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', function() {
