@@ -11,13 +11,11 @@ function App() {
       <div className="App">
         <Navbar />
         <Routes>
-          {/* <Route path="/" element={<Home />} exact />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/contact-us" element={<ContactUs />} />
-          <Route path="/login" element={<Login />} /> */}
+          <Route path="/" element={<MainContent />} exact />
+          {/*<Route path="/faq" element={<FAQ />} />
+          <Route path="/contact-us" element={<ContactUs />} />*/}
+          <Route path="/login" element={<LoginForm />} />
         </Routes>
-        <LoginForm />
-        <MainContent />
         <Footer />
       </div>
     </Router>
