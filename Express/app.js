@@ -2,15 +2,13 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const bodyParser = require('body-parser');
-const User = require('./models/User'); // Import the User model
-// Middleware for parsing application/x-www-form-urlencoded
+const User = require('./models/User');
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-app.use(bodyParser.json()); // for parsing application/json // for parsing application/x-www-form-urlencoded
-
+app.use(bodyParser.json());
 app.post('/register', async (req, res) => {
-    console.log(req.body);  // This will show what data is received
+    console.log(req.body);
 
     const { name, email, password } = req.body;
     try {
@@ -18,15 +16,13 @@ app.post('/register', async (req, res) => {
         await newUser.save();
         res.json({ success: true, message: 'User created successfully!' });
     } catch (error) {
-        console.error(error);  // This will log the error to the console
+        console.error(error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
-// Admin protal Login
-// Import necessary modules
+
 const bcrypt = require('bcryptjs');
 
-// Assuming you have a model for Admin, if not, you need to create one similar to the User model
 const Admin = require('./models/Admin');
 
 // Route to handle admin login
@@ -35,10 +31,8 @@ app.post('/admin/login', async (req, res) => {
     try {
         const admin = await Admin.findOne({ email: email });
         if (admin && bcrypt.compareSync(password, admin.password)) {
-            // Passwords match
-            res.redirect('/table.html'); // Redirect to table.html if login is successful
+            res.redirect('/table.html');
         } else {
-            // Authentication failed
             res.status(401).send('Invalid admin credentials');
         }
     } catch (error) {
@@ -55,16 +49,17 @@ const Accounts = require('./models/Accounts');
 const MeterReading = require('./models/MeterReading');
 const Payment = require('./models/Payment');
 const staff = require('./models/Staff');
+
 const mongoose = require('mongoose');
 
-// Replace 'your_database_url' with your actual MongoDB connection string
-const mongoDB = 'mongodb://localhost:27017';
-mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
-    
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', function() {
-    console.log("Connected to MongoDB successfully!");
+mongoose.connect('mongodb://localhost:27017/Electricity', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000
+}).then(() => {
+    console.log('MongoDB connected to E-billing database successfully');
+}).catch(err => {
+    console.error('MongoDB connection error:', err);
 });
 
 const Schema = mongoose.Schema;
@@ -74,11 +69,9 @@ const SomeModelSchema = new Schema({
     a_date: Date
 });
 
-// Create a model based on the schema
 const SomeModel = mongoose.model('SomeModel', SomeModelSchema);
 
 
-// Serve static files from the 'public' directory
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
