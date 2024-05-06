@@ -11,27 +11,18 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 app.post('/api/login', async (req, res) => {
-    console.log('Request Body:', req.body);
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        console.log('User:', user);
 
         if (!user) {
-            return res.status(404).send({ message: 'User not found' });
+            return res.status(404).send({ success: false, userExists: false, message: 'User not found' });
         }
-
         if (password !== user.password) {
-            return res.status(401).send({ message: 'Invalid credentials' });
+            return res.status(401).send({ success: false, userExists: true, message: 'Invalid credentials' });
         }
-
-        const customer = await Customer.findOne({ email });
-        console.log('Customer:', customer);
-        if (customer) {
-            res.send({ success: true, redirectUrl: '/payment-gateway.html' });
-        } else {
-            res.send({ success: true, message: 'Logged in successfully, but not as a customer' });
-        }
+        // User exists and password matches
+        res.send({ success: true, userExists: true, message: 'Logged in successfully' });
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).send({ message: 'Server error' });
@@ -40,3 +31,11 @@ app.post('/api/login', async (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+// Assuming User and Customer are Mongoose models
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb://localhost:27017/E-billing')
+    .then(() => console.log('MongoDB connected successfully'))
+    .catch(err => console.error('MongoDB connection error:', err));

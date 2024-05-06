@@ -11,17 +11,29 @@ const LoginForm = () => {
         try {
             const response = await axios.post('http://localhost:3001/api/login', { email, password });
             if (response.data.success) {
-                if (response.data.redirectUrl) {
-                    window.location.href = response.data.redirectUrl;
-                } else {
-                    alert(response.data.message);
-                }
+                // User exists and password matches
+                window.location.href = '/main-content';
             } else {
-                setErrorMessage('Login failed: ' + response.data.message);
+                if (!response.data.userExists) {
+                    // User does not exist, redirect to registration
+                    window.location.href = '/registration';
+                } else {
+                    // User exists but wrong password, show error message
+                    setErrorMessage('Invalid credentials. Please try again.');
+                }
             }
         } catch (error) {
-            console.error('Error:', error);
-            setErrorMessage('An error occurred while logging in. Please check the console for more details.');
+            if (error.response && error.response.status === 404) {
+                // User not found, redirect to registration
+                window.location.href = '/registration';
+            } else if (error.response && error.response.status === 401) {
+                // Wrong password, show error message
+                setErrorMessage('Invalid credentials. Please try again.');
+            } else {
+                // Other errors
+                console.error('Error:', error);
+                setErrorMessage('An error occurred while logging in. Please check the console for more details.');
+            }
         }
     };
 
@@ -34,17 +46,17 @@ const LoginForm = () => {
                     </div>
                     <form onSubmit={handleLogin}>
                         <div className="mb-3">
-                            <label className="form-label" for="email">Email</label>
+                            <label className="form-label" htmlFor="email">Email</label>
                             <input className="form-control item" type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                         </div>
                         <div className="mb-3">
-                            <label className="form-label" for="password">Password</label>
+                            <label className="form-label" htmlFor="password">Password</label>
                             <input className="form-control" type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
                         </div>
                         <div className="mb-3">
                             <div className="form-check">
                                 <input className="form-check-input" type="checkbox" id="checkbox" />
-                                <label className="form-check-label" for="checkbox">Remember me</label>
+                                <label className="form-check-label" htmlFor="checkbox">Remember me</label>
                             </div>
                         </div>
                         <div>
