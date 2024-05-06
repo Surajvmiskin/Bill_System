@@ -4,6 +4,8 @@ import Navbar from './components/Navbar';
 import Footer from './components/footer';
 import MainContent from './components/MainContent';
 import LoginForm from './components/LoginForm';
+import FaqPage from './components/FaqPage'
+import RegistrationPage from './components/RegistrationPage'
 
 function App() {
   return (
@@ -12,7 +14,9 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<MainContent />} exact />
-          {/*<Route path="/faq" element={<FAQ />} />
+          <Route path="/faq" element={<FaqPage />} />
+          <Route path="/registration" element={<RegistrationPage />} />
+          {/*
           <Route path="/contact-us" element={<ContactUs />} />*/}
           <Route path="/login" element={<LoginForm />} />
         </Routes>
