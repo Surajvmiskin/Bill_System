@@ -6,6 +6,9 @@ import MainContent from './components/MainContent';
 import LoginForm from './components/LoginForm';
 import FaqPage from './components/FaqPage'
 import RegistrationPage from './components/RegistrationPage'
+import PaymentGateway from './components/payment-gateway';
+import AdminLogin from './components/AdminLogin';
+import Admin from './components/Admin';
 
 function App() {
   return (
@@ -16,8 +19,9 @@ function App() {
           <Route path="/" element={<MainContent />} exact />
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/registration" element={<RegistrationPage />} />
-          {/*
-          <Route path="/contact-us" element={<ContactUs />} />*/}
+          <Route path='/payment-gateway' element={<PaymentGateway />} />
+          <Route path="/Admin-login" element={<AdminLogin />} />
+          <Route path="/Admin" element={<Admin />} />
           <Route path="/login" element={<LoginForm />} />
         </Routes>
         <Footer />

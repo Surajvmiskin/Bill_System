@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const Admin = require('./models/Admin'); // Adjust the path as necessary
 
 // MongoDB URL
-const mongoDB = 'mongodb://localhost:27017';
- // Change yourDatabaseName to your actual database name
+const mongoDB = 'mongodb://localhost:27017/E-billing';
+// Change yourDatabaseName to your actual database name
 
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 

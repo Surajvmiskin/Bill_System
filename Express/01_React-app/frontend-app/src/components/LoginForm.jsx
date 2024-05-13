@@ -12,7 +12,7 @@ const LoginForm = () => {
             const response = await axios.post('http://localhost:3001/api/login', { email, password });
             if (response.data.success) {
                 // User exists and password matches
-                window.location.href = '/main-content';
+                window.location.href = '/payment-gateway';
             } else {
                 if (!response.data.userExists) {
                     // User does not exist, redirect to registration

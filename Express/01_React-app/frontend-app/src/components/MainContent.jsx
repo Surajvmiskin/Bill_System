@@ -1,12 +1,12 @@
 import React from 'react';
-
+import { Link } from 'react-router-dom';
 const MainContent = () => {
     return (
         <main className="page landing-page">
             <section className="clean-block clean-hero" style={{ backgroundImage: "url('/img/tech/Electricity.jpg')", color: "rgba(9, 162, 255, 0.85)" }}>
                 <div className="text">
                     <h2>Electricity Consumption Tracking & Billing System Projectss</h2>
-                    <button className="btn btn-outline-light btn-lg info" type="button">Bill Track</button>
+                    <button className="btn btn-outline-light btn-lg info" type="button"><Link className="nav-link active" to="/payment-gateway">Bill Track</Link></button>
                 </div>
             </section>
             <section className="clean-block clean-info dark">
