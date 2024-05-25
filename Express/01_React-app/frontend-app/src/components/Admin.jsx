@@ -7,6 +7,32 @@ const Admin = () => {
         return [d.getFullYear(), pad(d.getMonth() + 1), pad(d.getDate())].join('-');
     }
 
+    const handleSubmit = (index) => {
+        const user = users[index];
+        fetch(`http://localhost:3001/api/users/${user._id}`, { // Ensure the URL is correct
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(user)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();  // Use text() first to handle empty responses
+            })
+            .then(text => text.length ? JSON.parse(text) : {})
+            .then(data => {
+                alert('User updated successfully');
+                // Update local state if necessary
+            })
+            .catch(error => {
+                console.error('Error updating user:', error);
+                alert('Failed to update user');
+            });
+    };
+
     const handleBillPaidChange = (index) => {
         const newUsers = [...users];
         newUsers[index].bill_paid = !newUsers[index].bill_paid;
@@ -20,7 +46,9 @@ const Admin = () => {
         Start_date: '',
         Billing_date: '',
         Due_date: '',
-        Total_Amount: ''
+        Total_Amount: '',
+        email: '', // Ensure email is included
+        password: '' // Ensure password is included if required
     });
 
     useEffect(() => {
@@ -48,33 +76,11 @@ const Admin = () => {
         setNewUser(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleSubmit = (index) => {
-        const user = users[index];
-        fetch(`/api/users/${user._id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(user)
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();  // Use text() first to handle empty responses
-            })
-            .then(text => text.length ? JSON.parse(text) : {})
-            .then(data => {
-                alert('User updated successfully');
-                // Update local state if necessary
-            })
-            .catch(error => {
-                console.error('Error updating user:', error);
-                alert('Failed to update user');
-            });
-    };
-
     const handleAddUser = () => {
+        if (!newUser.email) {
+            alert('Email is required');
+            return;
+        }
         fetch('http://localhost:3001/api/users', {
             method: 'POST',
             headers: {
@@ -85,7 +91,7 @@ const Admin = () => {
             .then(response => response.json())
             .then(data => {
                 setUsers([...users, data]);
-                setNewUser({ name: '', bill_no: '', Start_date: '', Billing_date: '', Due_date: '', Total_Amount: '' }); // Reset form
+                setNewUser({ name: '', bill_no: '', Start_date: '', Billing_date: '', Due_date: '', Total_Amount: '', email: '', password: '' }); // Reset form
                 alert('User added successfully');
             })
             .catch(error => {
@@ -108,9 +114,10 @@ const Admin = () => {
                                 <tr>
                                     <th>Bill Number</th>
                                     <th>Start Date</th>
-                                    <th>Billing Date</th>
+                                    {/* <th>Billing Date</th> */}
                                     <th>Due Date</th>
                                     <th>Total Amount</th>
+                                    <th>Email</th> {/* New column for Email */}
                                     <th>Actions</th>
                                     <th>Paid</th> {/* New column for Paid status */}
                                 </tr>
@@ -120,9 +127,10 @@ const Admin = () => {
                                     <tr key={index}>
                                         <td><input type="text" value={user.bill_no} onChange={(e) => handleInputChange(index, 'bill_no', e.target.value)} /></td>
                                         <td><input type="date" value={user.Start_date} onChange={(e) => handleInputChange(index, 'Start_date', e.target.value)} /></td>
-                                        <td><input type="date" value={user.Billing_date} onChange={(e) => handleInputChange(index, 'Billing_date', e.target.value)} /></td>
+                                        {/* <td><input type="date" value={user.Billing_date} onChange={(e) => handleInputChange(index, 'Billing_date', e.target.value)} /></td> */}
                                         <td><input type="date" value={user.Due_date} onChange={(e) => handleInputChange(index, 'Due_date', e.target.value)} /></td>
                                         <td><input type="number" value={user.Total_Amount} onChange={(e) => handleInputChange(index, 'Total_Amount', e.target.value)} /></td>
+                                        <td><input type="email" value={user.email} onChange={(e) => handleInputChange(index, 'email', e.target.value)} /></td> {/* Email input */}
                                         <td>
                                             <button onClick={() => handleSubmit(index)}>Save</button>
                                         </td>
@@ -140,9 +148,10 @@ const Admin = () => {
                                     {/* Inputs for adding a new user */}
                                     <td><input type="text" value={newUser.bill_no} onChange={(e) => handleNewUserChange('bill_no', e.target.value)} /></td>
                                     <td><input type="date" value={newUser.Start_date} onChange={(e) => handleNewUserChange('Start_date', e.target.value)} /></td>
-                                    <td><input type="date" value={newUser.Billing_date} onChange={(e) => handleNewUserChange('Billing_date', e.target.value)} /></td>
+                                    {/* <td><input type="date" value={newUser.Billing_date} onChange={(e) => handleNewUserChange('Billing_date', e.target.value)} /></td> */}
                                     <td><input type="date" value={newUser.Due_date} onChange={(e) => handleNewUserChange('Due_date', e.target.value)} /></td>
                                     <td><input type="number" value={newUser.Total_Amount} onChange={(e) => handleNewUserChange('Total_Amount', e.target.value)} /></td>
+                                    <td><input type="email" value={newUser.email} onChange={(e) => handleNewUserChange('email', e.target.value)} /></td> {/* Email input */}
                                     <td>
                                         <button onClick={handleAddUser}>Add User</button>
                                     </td>

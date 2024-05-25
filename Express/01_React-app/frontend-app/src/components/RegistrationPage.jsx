@@ -19,19 +19,22 @@ const RegistrationPage = () => {
             },
             body: JSON.stringify(data)
         })
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                alert(result.message);
-                window.location.href = '/login.html';
-            } else {
-                alert('Registration failed: ' + result.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred. Please try again.');
-        });
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(result => {
+                if (result.success) {
+                    alert(result.message);
+                    window.location.href = '/login';
+                } else {
+                    alert('Registration failed: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
     };
 
     return (

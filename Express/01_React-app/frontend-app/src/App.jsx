@@ -9,6 +9,7 @@ import RegistrationPage from './components/RegistrationPage'
 import PaymentGateway from './components/payment-gateway';
 import AdminLogin from './components/AdminLogin';
 import Admin from './components/Admin';
+import ContactUsPage from './components/Contact-us';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/Admin-login" element={<AdminLogin />} />
           <Route path="/Admin" element={<Admin />} />
           <Route path="/login" element={<LoginForm />} />
+          <Route path="/contact-us" element={<ContactUsPage />} />
         </Routes>
         <Footer />
       </div>

@@ -5,6 +5,7 @@ const userSchema = new Schema({
     name: String,
     bill_no: String,
     Start_date: String,
+    Billing_date: String,
     Due_date: String,
     Total_Amount: String,
     email: { type: String, required: false, unique: true },  // Make email optional

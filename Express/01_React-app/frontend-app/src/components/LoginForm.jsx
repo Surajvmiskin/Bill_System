@@ -59,10 +59,12 @@ const LoginForm = () => {
                                 <label className="form-check-label" htmlFor="checkbox">Remember me</label>
                             </div>
                         </div>
-                        <div>
+                        <div className="d-flex justify-content-between">
                             <button type="submit" className="btn btn-primary">Log In</button>
-                            <a href="Admin-login.html" className="btn btn-primary">Login as Admin?</a>
-                            <a href="registration.html" className="btn btn-link mt-2">Don't have an account? Sign up</a>
+                            <a href="Admin-login" className="btn btn-primary">Login as Admin?</a>
+                        </div>
+                        <div className="mt-3">
+                            <a href="registration" className="btn btn-link">Don't have an account? Sign up</a>
                         </div>
                         {errorMessage && <div className="alert alert-danger" role="alert">{errorMessage}</div>}
                     </form>

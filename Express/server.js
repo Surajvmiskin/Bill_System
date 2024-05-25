@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const User = require('./models/User');
-const Admin = require('./models/Admin'); // Ensure you have imported the Customer model
+const Admin = require('./models/Admin');
 
 const app = express();
 
@@ -39,7 +39,7 @@ app.post('/admin/login', async (req, res) => {
 // User data retrieval
 app.get('/api/users', async (req, res) => {
     try {
-        const users = await User.find({}, 'name bill_no Start_date Due_date Total_Amount bill_paid').exec();
+        const users = await User.find({}, 'name bill_no Start_date Due_date Total_Amount email bill_paid').exec();
         res.json(users);
     } catch (error) {
         console.error('Failed to fetch users:', error);
@@ -48,11 +48,17 @@ app.get('/api/users', async (req, res) => {
 });
 app.post('/api/users', async (req, res) => {
     const { name, bill_no, Start_date, Billing_date, Due_date, Total_Amount, email, password, bill_paid } = req.body;
+    if (!email) {
+        return res.status(400).send({ message: 'Email is required' });
+    }
     try {
         const newUser = new User({ name, bill_no, Start_date, Billing_date, Due_date, Total_Amount, email, password, bill_paid });
         await newUser.save();
         res.status(201).json(newUser);
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).send({ message: 'Duplicate email', error: error.message });
+        }
         console.error('Error adding new user:', error);
         res.status(500).send({ message: 'Failed to add new user', error: error.message });
     }
@@ -74,9 +80,7 @@ app.put('/api/users/:id', async (req, res) => {
 
 
 
-
-
-
+// login api
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -96,15 +100,52 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// Payment API
+app.get('/api/get-remaining-amount/:billNo/:email', async (req, res) => {
+    try {
+        const { billNo, email } = req.params;
+        const user = await User.findOne({ bill_no: billNo, email: email }, 'Total_Amount');
+        if (!user) {
+            res.status(404).json({ message: 'No record found for the provided bill number and email' });
+            return;
+        }
+        res.json({ amount: user.Total_Amount });
+    } catch (error) {
+        console.error('Error fetching remaining amount:', error);
+        res.status(500).json({ message: 'Server error', error: error.toString() });
+    }
+});
+
+app.post('/api/pay-bill', async (req, res) => {
+    try {
+        const { billNo, email } = req.body;
+        const user = await User.findOneAndUpdate(
+            { bill_no: billNo, email: email },
+            { bill_paid: true },
+            { new: true }
+        );
+        if (!user) {
+            res.status(404).json({ message: 'No record found for the provided bill number and email' });
+            return;
+        }
+        res.json({ message: 'Bill paid successfully', user });
+    } catch (error) {
+        console.error('Error updating bill paid status:', error);
+        res.status(500).json({ message: 'Server error', error: error.toString() });
+    }
+});
+
+
+
+
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
 // Assuming User and Customer are Mongoose models
 const mongoose = require('mongoose');
-
-
 console.log('Connecting to MongoDB at:', 'mongodb://localhost:27017/E-billing');
+console.log('Connecting to MongoDB at:', 'mongodb://localhost:27017/E-billing');
+// mongoose.connect('mongodb+srv://Suraj:123@cluster0.uuxn554.mongodb.net/E-billing')
 mongoose.connect('mongodb://localhost:27017/E-billing')
     .then(() => console.log('MongoDB connected successfully'))
     .catch(err => console.error('MongoDB connection error:', err));

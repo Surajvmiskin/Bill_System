@@ -4,32 +4,85 @@ import { useNavigate } from 'react-router-dom';
 const PaymentGateway = () => {
     const [billNo, setBillNo] = useState('');
     const [remainingAmount, setRemainingAmount] = useState(null);
-    const [connectionType, setConnectionType] = useState('');
-    const history = useNavigate();
+    const [email, setEmail] = useState('');  // Changed from connectionType to email
+    const navigate = useNavigate();
 
     useEffect(() => {
-        if (billNo && connectionType) {
-            // Fetch the remaining amount from the database
-            // Adjust the API endpoint as necessary
-            fetch(`/api/get-remaining-amount/${billNo}/${connectionType}`)
-                .then(response => response.json())
-                .then(data => setRemainingAmount(data.amount))
-                .catch(error => console.error('Error fetching data:', error));
+        if (billNo && email) {
+            const url = `http://localhost:3001/api/get-remaining-amount/${encodeURIComponent(billNo)}/${encodeURIComponent(email)}`;
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.amount !== undefined) {
+                        setRemainingAmount(data.amount);
+                    } else {
+                        console.error('No amount returned:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
         }
-    }, [billNo, connectionType]);
+    }, [billNo, email]);
 
     const handleBillNoChange = (event) => {
-        setBillNo(event.target.value);
+        const input = event.target.value;
+        // Allow only digits and limit length to 6
+        if (input.match(/^\d{0,6}$/)) {
+            setBillNo(input);
+        }
     };
 
-    const handleConnectionTypeChange = (event) => {
-        setConnectionType(event.target.value);
+    const handleEmailChange = (event) => {  // Changed from handleConnectionTypeChange
+        setEmail(event.target.value);  // Changed from setConnectionType
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        // Redirect to the payment page
-        history.push(`/payment-page/${billNo}`);
+        // Validate email and bill number before submitting
+        if (!email || !billNo) {
+            alert('Both email and bill number are required.');
+            return;
+        }
+        if (billNo.length !== 6) {
+            alert('Bill number must be exactly 6 digits.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:3001/api/get-remaining-amount/${encodeURIComponent(billNo)}/${encodeURIComponent(email)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.amount !== undefined) {
+                setRemainingAmount(data.amount);
+                // Update bill_paid to true
+                const payResponse = await fetch('http://localhost:3001/api/pay-bill', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ billNo, email }),
+                });
+                if (!payResponse.ok) {
+                    throw new Error(`HTTP error! status: ${payResponse.status}`);
+                }
+                const payData = await payResponse.json();
+                console.log('Bill paid successfully:', payData);
+                alert('Payment successful! Your bill has been paid.');
+            } else {
+                console.error('No amount returned:', data);
+            }
+        } catch (error) {
+            console.error('Error fetching remaining amount:', error);
+            alert('Failed to fetch remaining amount. Please try again.');
+        }
     };
 
     return (
@@ -61,27 +114,25 @@ const PaymentGateway = () => {
                                     </div>
                                     <div className="row" style={{ marginRight: '0px', marginLeft: '0px', paddingTop: '24px' }}>
                                         <div className="col-md-8 offset-md-1">
-                                            <p style={{ marginLeft: '2%', fontFamily: 'Roboto, sans-serif', fontSize: '24px' }}><strong>Type</strong></p>
+                                            <p style={{ marginLeft: '2%', fontFamily: 'Roboto, sans-serif', fontSize: '24px' }}><strong>Email</strong></p>
                                         </div>
                                         <div className="col-md-10 offset-md-1">
-                                            <select
-                                                className="form-select"
-                                                style={{ fontFamily: 'Roboto, sans-serif' }}
-                                                name="connectionType"
-                                                value={connectionType}
-                                                onChange={handleConnectionTypeChange}
-                                            >
-                                                <option value="">Select Type</option>
-                                                <option value="domestic">Domestic</option>
-                                                <option value="commercial">Commercial</option>
-                                            </select>
+                                            <input
+                                                className="form-control"
+                                                type="email"
+                                                style={{ marginLeft: '0px', fontFamily: 'Roboto, sans-serif' }}
+                                                name="email"
+                                                placeholder="Enter your email"
+                                                value={email}
+                                                onChange={handleEmailChange}
+                                            />
                                         </div>
                                     </div>
                                     {remainingAmount !== null && (
                                         <div className="row" style={{ paddingTop: '24px' }}>
                                             <div className="col-md-8 offset-md-1">
                                                 <p style={{ fontFamily: 'Roboto, sans-serif', fontSize: '18px' }}>
-                                                    Remaining Amount to Pay: ${remainingAmount}
+                                                    Remaining Amount to Pay: {remainingAmount} Rs
                                                 </p>
                                             </div>
                                         </div>
@@ -94,11 +145,7 @@ const PaymentGateway = () => {
                                 </div>
                             </div>
                         </form>
-                    </div>
-                </div>
-            </section>
-        </main>
-    );
+                    </div></div></section></main>);
 };
 
 export default PaymentGateway;
